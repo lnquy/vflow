@@ -1,3 +1,7 @@
+**Note: Originally forked from [Verizon's vflow](https://github.com/VerizonDigital/vflow) with added customizations for my own uses.**   
+**DO NOT USE THIS PROJECT IN YOUR PRODUCTION.** 
+
+
 ![vFlow](docs/imgs/vflow_logo.png?raw=true "vFlow logo")
 ##
 [![Build Status](https://travis-ci.org/VerizonDigital/vflow.svg?branch=master)](https://travis-ci.org/VerizonDigital/vflow) 
@@ -16,7 +20,7 @@ High-performance, scalable and reliable IPFIX, sFlow and Netflow collector (writ
 - Supports IPv4 and IPv6
 - Monitoring with InfluxDB and OpenTSDB backend
 
-![Alt text](/docs/imgs/vflow.gif?raw=true "vFlow")
+![Alt text](./docs/imgs/vflow.gif?raw=true "vFlow")
 
 ## Documentation
 - [Architecture](/docs/design.md).

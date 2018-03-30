@@ -136,7 +136,7 @@ func (s *SFlow) run() {
 
 	for !s.stop {
 		b := sFlowBuffer.Get().([]byte)
-		conn.SetReadDeadline(time.Now().Add(1e9))
+		conn.SetReadDeadline(time.Now().Add(time.Second))
 		n, raddr, err := conn.ReadFromUDP(b)
 		if err != nil {
 			continue
@@ -145,13 +145,12 @@ func (s *SFlow) run() {
 		atomic.AddUint64(&s.stats.UDPCount, 1)
 		sFlowUDPCh <- SFUDPMsg{raddr, b[:n]}
 	}
-
 }
 
 func (s *SFlow) shutdown() {
 	s.stop = true
 	logger.Println("stopping sflow service gracefully ...")
-	time.Sleep(1 * time.Second)
+	time.Sleep(time.Second)
 	logger.Println("vFlow has been shutdown")
 	close(sFlowUDPCh)
 }

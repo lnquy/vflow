@@ -1,9 +1,14 @@
-stress/
-vflow/
+# stress/
+# vflow/
 .DS_Store
+vendor/
 
 # Intellij
 .idea/
 *.iml
 *.iws
 *~
+
+# Binaries
+vflow
+vflow.*
