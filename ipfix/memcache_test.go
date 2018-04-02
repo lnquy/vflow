@@ -77,3 +77,19 @@ func TestMemCacheAllSetIds(t *testing.T) {
 		t.Errorf("Expected set IDs %v, got %v", expected, actual)
 	}
 }
+
+var (
+	tmpShard *TemplatesShard
+	tmpSum uint32
+)
+func BenchmarkGetShard(b *testing.B) {
+	b.StopTimer()
+	mc := GetCache("")
+	ip := net.IP([]byte{13, 0, 10, 8, 5, 8, 0, 1})
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		s, k := mc.getShard(uint16(i), ip)
+		tmpShard = s
+		tmpSum = k
+	}
+}

@@ -23,37 +23,43 @@
 package ipfix
 
 import (
-	"encoding/binary"
 	"encoding/json"
-	"hash/fnv"
 	"io/ioutil"
 	"net"
 	"sort"
 	"sync"
 	"time"
+	"hash/fnv"
+	"encoding/binary"
 )
 
-var shardNo = 32
+var (
+	shardNo = 32
+	hash    = fnv.New32()
+)
 
-// MemCache represents templates shards
-type MemCache []*TemplatesShard
+type (
+	// MemCache represents templates shards
+	MemCache []*TemplatesShard
 
-// Data represents template records and
-// updated timestamp
-type Data struct {
-	Template  TemplateRecord
-	Timestamp int64
-}
+	// Data represents template records and
+	// updated timestamp
+	Data struct {
+		Template  TemplateRecord
+		Timestamp int64
+	}
 
-// TemplatesShard represents a shard
-type TemplatesShard struct {
-	Templates map[uint32]Data
-	sync.RWMutex
-}
-type memCacheDisk struct {
-	Cache   MemCache
-	ShardNo int
-}
+	// TemplatesShard represents a shard
+	TemplatesShard struct {
+		Templates map[uint32]Data
+		sync.RWMutex
+	}
+
+	memCacheDisk struct {
+		Cache   MemCache
+		ShardNo int
+	}
+)
 
 // GetCache tries to load saved templates
 // otherwise it constructs new empty shards
@@ -65,6 +71,7 @@ func GetCache(cacheFile string) MemCache {
 
 	b, err := ioutil.ReadFile(cacheFile)
 	if err == nil {
+		// TODO: protobuf, msgpack
 		err = json.Unmarshal(b, &mem)
 		if err == nil && mem.ShardNo == shardNo {
 			return mem.Cache
@@ -79,31 +86,29 @@ func GetCache(cacheFile string) MemCache {
 	return m
 }
 
+// TODO: Optimize for other protocols
 func (m MemCache) getShard(id uint16, addr net.IP) (*TemplatesShard, uint32) {
 	b := make([]byte, 2)
 	binary.BigEndian.PutUint16(b, id)
-	key := append(addr, b...)
-
-	hash := fnv.New32()
-	hash.Write(key)
+	hash.Reset()
+	hash.Write(addr)
+	hash.Write(b)
 	hSum32 := hash.Sum32()
-
 	return m[uint(hSum32)%uint(shardNo)], hSum32
 }
 
 func (m MemCache) insert(id uint16, addr net.IP, tr TemplateRecord) {
 	shard, key := m.getShard(id, addr)
 	shard.Lock()
-	defer shard.Unlock()
 	shard.Templates[key] = Data{tr, time.Now().Unix()}
+	shard.Unlock()
 }
 
 func (m MemCache) retrieve(id uint16, addr net.IP) (TemplateRecord, bool) {
 	shard, key := m.getShard(id, addr)
 	shard.RLock()
-	defer shard.RUnlock()
 	v, ok := shard.Templates[key]
-
+	shard.RUnlock()
 	return v.Template, ok
 }
 
@@ -126,6 +131,7 @@ func (m MemCache) allSetIds() []int {
 }
 
 // Dump saves the current templates to hard disk
+// TODO
 func (m MemCache) Dump(cacheFile string) error {
 	b, err := json.Marshal(
 		memCacheDisk{

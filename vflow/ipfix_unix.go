@@ -36,6 +36,7 @@ func mirrorIPFIXDispatcher(ch chan IPFIXUDPMsg) {
 	)
 
 	if opts.IPFIXMirrorAddr == "" {
+		logger.Printf("ipfix mirror service is disabled")
 		return
 	}
 

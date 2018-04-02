@@ -155,12 +155,12 @@ func (i *IPFIX) run() {
 		conn.SetReadDeadline(time.Now().Add(1e9))
 		n, raddr, err := conn.ReadFromUDP(b)
 		if err != nil {
+			logger.Println(err)
 			continue
 		}
 		atomic.AddUint64(&i.stats.UDPCount, 1)
 		ipfixUDPCh <- IPFIXUDPMsg{raddr, b[:n]}
 	}
-
 }
 
 func (i *IPFIX) shutdown() {
