@@ -10,5 +10,8 @@ vendor/
 *~
 
 # Binaries
-vflow
-vflow.*
+vflow/vflow
+stress/stress
+vflow/dev-vflow.pid
+vflow/dev-vflow.log
+dev-vflow.templates

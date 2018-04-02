@@ -8,12 +8,6 @@
   version = "v1.16.0"
 
 [[projects]]
-  name = "github.com/VerizonDigital/vflow"
-  packages = ["ipfix","mirror","monitor/store","netflow/v9","packet","producer","reader","sflow","stress/hammer"]
-  revision = "ade05f9b48805aec302af708c374ad4418b09091"
-  version = "v0.5.0"
-
-[[projects]]
   name = "github.com/bitly/go-nsq"
   packages = ["."]
   revision = "eee57a3ac4174c55924125bb15eeeda8cffb6e6f"
@@ -106,6 +100,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c04eb4d82d4ab8ca0757dd826e3db9245f245b7e69517e8d8bc14704f301ab90"
+  inputs-digest = "d4dbeab7e8a1922288c442248984194ea19526f7d898f16f18bacd36ccf406f9"
   solver-name = "gps-cdcl"
   solver-version = 1

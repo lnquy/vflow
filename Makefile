@@ -16,11 +16,14 @@ bench:
 run: build
 	cd vflow; ./vflow -sflow-workers 100 -ipfix-workers 100
 
+dev: build
+	cd vflow; ./vflow -config dev-vflow.yml
+
 debug: build
-	cd vflow; ./vflow -sflow-workers 100 -ipfix-workers 100 -verbose=true
+	cd vflow; ./vflow -config dev-vflow.yml -verbose=true
 
 gctrace: build
-	cd vflow; env GODEBUG=gctrace=1 ./vflow -sflow-workers 100 -ipfix-workers 100
+	cd vflow; env GODEBUG=gctrace=1 ./vflow dev-vflow.yml
 
 lint:
 	golint ./...
@@ -72,3 +75,11 @@ rpm: build
 	cp NOTICE ${RPMPATH}/SOURCES/notice
 	rpmbuild -ba ${RPMPATH}/SPECS/vflow.spec --define "_topdir `pwd`/scripts/rpmbuild"
 	sed -i 's/${VERSION}/%VERSION%/' ${RPMPATH}/SPECS/vflow.spec
+
+clean:
+	rm -f stress/stress vflow/vflow vflow/dev-vflow.log vflow/dev-vflow.pid dev-vflow.templates
+
+format:
+	go fmt ./...
+
+submit: test build clean format
