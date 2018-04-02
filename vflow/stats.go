@@ -30,6 +30,13 @@ import (
 	"time"
 )
 
+// Common interface for flows statistics.
+// All protocols statistics must implement and return this interface in status() method.
+type flowStats interface {
+	// Dummy methods. Implementers just have to describe this func as its method signature.
+	isFlowStats()
+}
+
 var startTime = time.Now().Unix()
 
 // StatsSysHandler handles /sys endpoint
@@ -51,7 +58,7 @@ func StatsSysHandler(w http.ResponseWriter, r *http.Request) {
 		NumGoroutine    int
 		MaxProcs        int
 		GoVersion       string
-		StartTime       int64
+		StartTime       string
 	}{
 		mem.Alloc,
 		mem.TotalAlloc,
@@ -66,7 +73,7 @@ func StatsSysHandler(w http.ResponseWriter, r *http.Request) {
 		runtime.NumGoroutine(),
 		runtime.GOMAXPROCS(-1),
 		runtime.Version(),
-		startTime,
+		time.Unix(startTime, 0).String(),
 	}
 
 	j, err := json.Marshal(data)
@@ -80,20 +87,19 @@ func StatsSysHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // StatsFlowHandler handles /flow endpoint
-func StatsFlowHandler(i *IPFIX, s *SFlow, n *NetflowV9) http.HandlerFunc {
+func StatsFlowHandler(protos ...proto) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var data = &struct {
 			StartTime int64
-			IPFIX     *IPFIXStats
-			SFlow     *SFlowStats
-			NetflowV9 *NetflowV9Stats
+			Stats     map[string]flowStats
 		}{
-			startTime,
-			i.status(),
-			s.status(),
-			n.status(),
+			StartTime: startTime,
+			Stats:     make(map[string]flowStats),
 		}
 
+		for _, p := range protos {
+			data.Stats[p.name()] = p.status()
+		}
 		j, err := json.Marshal(data)
 		if err != nil {
 			logger.Println(err)
@@ -105,14 +111,14 @@ func StatsFlowHandler(i *IPFIX, s *SFlow, n *NetflowV9) http.HandlerFunc {
 	}
 }
 
-func statsHTTPServer(ipfix *IPFIX, sflow *SFlow, netflow9 *NetflowV9) {
+func statsHTTPServer(protos ...proto) {
 	if !opts.StatsEnabled {
 		return
 	}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/sys", StatsSysHandler)
-	mux.HandleFunc("/flow", StatsFlowHandler(ipfix, sflow, netflow9))
+	mux.HandleFunc("/flow", StatsFlowHandler(protos...))
 
 	addr := net.JoinHostPort(opts.StatsHTTPAddr, opts.StatsHTTPPort)
 

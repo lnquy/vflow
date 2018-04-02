@@ -62,6 +62,8 @@ type SFlowStats struct {
 	Workers      int32
 }
 
+func (sfs *SFlowStats) isFlowStats() {} // Dummy function implemented flowStats interface
+
 var (
 	sFlowUDPCh = make(chan SFUDPMsg, 1000)
 	sFlowMQCh  = make(chan []byte, 1000)
@@ -83,6 +85,10 @@ func NewSFlow() *SFlow {
 		workers: opts.SFlowWorkers,
 		pool:    make(chan chan struct{}, maxWorkers),
 	}
+}
+
+func (s *SFlow) name() string {
+	return "SFlow"
 }
 
 func (s *SFlow) run() {
@@ -226,7 +232,7 @@ LOOP:
 	}
 }
 
-func (s *SFlow) status() *SFlowStats {
+func (s *SFlow) status() flowStats {
 	return &SFlowStats{
 		UDPQueue:     len(sFlowUDPCh),
 		MessageQueue: len(sFlowMQCh),

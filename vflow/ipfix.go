@@ -61,6 +61,8 @@ type IPFIXStats struct {
 	Workers        int32
 }
 
+func (ips *IPFIXStats) isFlowStats() {} // Dummy function implemented flowStats interface
+
 var (
 	ipfixUDPCh         = make(chan IPFIXUDPMsg, 1000)
 	ipfixMCh           = make(chan IPFIXUDPMsg, 1000)
@@ -85,6 +87,10 @@ func NewIPFIX() *IPFIX {
 		workers: opts.IPFIXWorkers,
 		pool:    make(chan chan struct{}, maxWorkers),
 	}
+}
+
+func (i *IPFIX) name() string {
+	return "IPFIX"
 }
 
 func (i *IPFIX) run() {
@@ -252,7 +258,7 @@ LOOP:
 	}
 }
 
-func (i *IPFIX) status() *IPFIXStats {
+func (i *IPFIX) status() flowStats {
 	return &IPFIXStats{
 		UDPQueue:       len(ipfixUDPCh),
 		UDPMirrorQueue: len(ipfixMCh),

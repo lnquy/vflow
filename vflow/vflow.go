@@ -38,7 +38,9 @@ var (
 )
 
 type proto interface {
+	name() string
 	run()
+	status() flowStats
 	shutdown()
 }
 
@@ -67,7 +69,7 @@ func main() {
 		}(p)
 	}
 
-	go statsHTTPServer(ipfix, sFlow, netflow9)
+	go statsHTTPServer(protos...)
 
 	<-signalCh
 
@@ -78,6 +80,5 @@ func main() {
 			p.shutdown()
 		}(p)
 	}
-
 	wg.Wait()
 }

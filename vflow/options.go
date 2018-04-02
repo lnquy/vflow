@@ -172,6 +172,7 @@ func (opts Options) vFlowPIDWrite() {
 		opts.Logger.Println(err)
 		return
 	}
+	defer f.Close()
 
 	_, err = fmt.Fprintf(f, "%d", os.Getpid())
 	if err != nil {
@@ -210,14 +211,11 @@ func (opts Options) GetCPU() int {
 		numCPUErr   = "the CPU number should be greater than zero!"
 	)
 
-	if strings.Contains(opts.CPUCap, "%") {
-		pctStr := strings.Trim(opts.CPUCap, "%")
-
-		pctInt, err := strconv.Atoi(pctStr)
+	if strings.HasSuffix(opts.CPUCap, "%") {
+		pctInt, err := strconv.Atoi(string(opts.CPUCap[:len(opts.CPUCap)-1]))
 		if err != nil {
-			opts.Logger.Fatalf("invalid CPU cap")
+			opts.Logger.Fatalf("invalid CPU cap: %s", opts.CPUCap)
 		}
-
 		if pctInt < 1 || pctInt > 100 {
 			opts.Logger.Fatalf(invalCPUErr)
 		}
@@ -228,7 +226,6 @@ func (opts Options) GetCPU() int {
 		if err != nil {
 			opts.Logger.Fatalf("invalid CPU cap")
 		}
-
 		if numInt < 1 {
 			opts.Logger.Fatalf(numCPUErr)
 		}
@@ -237,9 +234,8 @@ func (opts Options) GetCPU() int {
 	}
 
 	if numCPU > availCPU {
-		numCPU = availCPU
+		return availCPU
 	}
-
 	return numCPU
 }
 
@@ -304,7 +300,7 @@ func (opts *Options) vFlowFlagSet() {
 	# set 3rd party ipfix collector
 	vflow -ipfix-mirror-addr 192.168.1.10 -ipfix-mirror-port 4319
 
-	# enaable verbose logging
+	# enable verbose logging
 	vflow -verbose=true
 
 	# for more information

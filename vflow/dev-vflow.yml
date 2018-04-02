@@ -1,7 +1,0 @@
-ipfix-workers: 100
-sflow-workers: 100
-netflow9-workers: 50
-pid-file: dev-vflow.pid
-#log-file: dev-vflow.log
-ipfix-tpl-cache-file: dev-vflow.templates
-mq-config-file: dev-mq-kafka.yml

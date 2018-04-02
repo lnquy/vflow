@@ -77,7 +77,7 @@ rpm: build
 	sed -i 's/${VERSION}/%VERSION%/' ${RPMPATH}/SPECS/vflow.spec
 
 clean:
-	rm -f stress/stress vflow/vflow vflow/dev-vflow.log vflow/dev-vflow.pid dev-vflow.templates
+	rm -f stress/stress vflow/vflow vflow/dev-vflow.log vflow/dev-vflow.pid vflow/dev-vflow.templates
 
 format:
 	go fmt ./...

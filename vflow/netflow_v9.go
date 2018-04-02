@@ -60,6 +60,8 @@ type NetflowV9Stats struct {
 	Workers      int32
 }
 
+func (nfs *NetflowV9Stats) isFlowStats() {} // Dummy function implemented flowStats interface
+
 var (
 	netflowV9UDPCh = make(chan NetflowV9UDPMsg, 1000)
 	netflowV9MQCh  = make(chan []byte, 1000)
@@ -81,6 +83,10 @@ func NewNetflowV9() *NetflowV9 {
 		workers: opts.NetflowV9Workers,
 		pool:    make(chan chan struct{}, maxWorkers),
 	}
+}
+
+func (i *NetflowV9) name() string {
+	return "NetflowV9"
 }
 
 func (i *NetflowV9) run() {
@@ -231,7 +237,7 @@ LOOP:
 
 }
 
-func (i *NetflowV9) status() *NetflowV9Stats {
+func (i *NetflowV9) status() flowStats {
 	return &NetflowV9Stats{
 		UDPQueue:     len(netflowV9UDPCh),
 		MessageQueue: len(netflowV9MQCh),
@@ -240,7 +246,6 @@ func (i *NetflowV9) status() *NetflowV9Stats {
 		MQErrorCount: atomic.LoadUint64(&i.stats.MQErrorCount),
 		Workers:      atomic.LoadInt32(&i.stats.Workers),
 	}
-
 }
 
 func (i *NetflowV9) dynWorkers() {
